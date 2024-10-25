@@ -1,4 +1,7 @@
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 const userSchema = new mongoose.Schema({
     name: {type: String, required: true},
@@ -16,6 +19,7 @@ userSchema.methods.toJSON = function() {
     delete obj.updatedAt;
     return obj;
 };
+
 
 const User = mongoose.model("User", userSchema);
 
