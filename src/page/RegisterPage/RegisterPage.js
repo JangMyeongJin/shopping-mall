@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Form, Button, Alert } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
@@ -20,12 +20,13 @@ const RegisterPage = () => {
   const [passwordError, setPasswordError] = useState("");
   const [policyError, setPolicyError] = useState(false);
   const { registrationError } = useSelector((state) => state.user);
+  const [buttonDisabled, setButtonDisabled] = useState(true);  
 
   const register = (event) => {
     event.preventDefault();
     const { name, email, password, confirmPassword, policy } = formData;
     const checkConfirmPassword = password === confirmPassword;
-    console.log(name);
+    
     if(name === "") {
       setPolicyError("Please enter your name");
       return;
@@ -54,6 +55,20 @@ const RegisterPage = () => {
       setFormData({ ...formData, [id]: value });
     }
   };
+
+  const validateForm = (data) => {
+    return (
+      data.email !== "" &&
+      data.name !== "" &&
+      data.password !== "" &&
+      data.confirmPassword !== "" &&
+      data.policy
+    );
+  };
+
+  useEffect(() => {
+    setButtonDisabled(!validateForm(formData));
+  }, [formData]);
 
   return (
     <Container className="register-area">
@@ -119,7 +134,7 @@ const RegisterPage = () => {
             checked={formData.policy}
           />
         </Form.Group>
-        <Button variant="danger" type="submit">
+        <Button variant="danger" type="submit" disabled={buttonDisabled}>
           회원가입
         </Button>
       </Form>

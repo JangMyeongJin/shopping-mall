@@ -17,22 +17,25 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    if (loginError) {
-      dispatch(clearErrors());
-    }
-  }, [navigate]);
+
+  }, []);
+
   const handleLoginWithEmail = (event) => {
     event.preventDefault();
+
     dispatch(loginWithEmail({ email, password }));
+
   };
 
   const handleGoogleLogin = async (googleData) => {
     //구글 로그인 하기
   };
 
+  // 다른 로그인 방법이 있기 때문에 Login 페이지에서 메인페이지로 이동
   if (user) {
     navigate("/");
   }
+
   return (
     <>
       <Container className="login-area">

@@ -6,7 +6,26 @@ import { initialCart } from "../cart/cartSlice";
 
 export const loginWithEmail = createAsyncThunk(
   "user/loginWithEmail",
-  async ({ email, password }, { rejectWithValue }) => {}
+  async ({ email, password }, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/user/login", {
+        email,
+        password,
+      });
+
+      if(response.status === 200) {
+        sessionStorage.setItem("token", response.data.token);   // session에 token 저장
+        api.defaults.headers["authorization"] = "Bearer " + response.data.token;  // headers에 token 저장, Bearer는 토큰에 붙여주는 규칙(?)
+
+        return response.data;
+      }
+
+    } catch (error) {
+
+      // error.[key] 로 접근 가능 (error.response는 접근 불가)
+      return rejectWithValue(error.message);
+    }
+  }
 );
 
 export const loginWithGoogle = createAsyncThunk(
@@ -79,21 +98,42 @@ const userSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-
-    // pending 로딩중
-    builder.addCase(registerUser.pending, (state) => {
+    
+    builder
+    .addCase(registerUser.pending, (state) => {
+      // 회원가입 pending
       state.loading = true;
-    });
 
-    // fulfilled 성공
-    builder.addCase(registerUser.fulfilled, (state) => {
+    })
+    .addCase(registerUser.fulfilled, (state) => {
+      // 회원가입 fulfilled
       state.loading = false;
       state.registrationError = null;
-    });
 
-    // rejected 실패
-    builder.addCase(registerUser.rejected, (state, action) => {
+    })
+    .addCase(registerUser.rejected, (state, action) => {
+      // 회원가입 rejected
       state.registrationError = action.payload;
+
+    })
+    .addCase(loginWithEmail.pending, (state) => {
+      // 로그인 pending
+      state.loading = true;
+
+    })
+    .addCase(loginWithEmail.fulfilled, (state, action) => {
+      // 로그인 fulfilled
+      state.loading = false;
+      state.user = action.payload.user;
+      state.loginError = null;
+
+    })
+    .addCase(loginWithEmail.rejected, (state, action) => {
+      // 로그인 rejected
+      state.loginError = action.payload;
+      state.loading = false;
+      state.user = null;
+
     });
   },
 });
