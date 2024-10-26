@@ -39,4 +39,39 @@ userController.createUser = async (req, res) => {
     }
 }
 
+userController.loginUser = async (req,res) => {
+    try{
+        const {email,password} = req.body;
+
+        const user = await User.findOne({
+            email:email
+        },"-__v -createdAt -updatedAt");
+        
+        if(user) {
+
+            // bcrypt 이용해서 hash password 비교
+            const isMatch = await bcrypt.compareSync(password, user.password);
+            if(isMatch) {
+                const token = user.generateToken();
+
+                return res.status(200).json({
+                    status: "ok",
+                    user,
+                    token
+                });
+            }else {
+                throw new Error("Is not match password.");
+            }
+        }else {
+            throw new Error("Is not match email.");
+        }
+
+    }catch(err){
+        res.status(400).json({
+            status: "fail",
+            message: err.message
+        });
+    }
+}
+
 module.exports = userController;

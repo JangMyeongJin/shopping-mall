@@ -20,6 +20,14 @@ userSchema.methods.toJSON = function() {
     return obj;
 };
 
+userSchema.methods.generateToken = function() {
+    const token = jwt.sign({
+        _id: this._id
+    }, JWT_SECRET_KEY, {
+        expiresIn: "1d"
+    });
+    return token;
+};
 
 const User = mongoose.model("User", userSchema);
 
