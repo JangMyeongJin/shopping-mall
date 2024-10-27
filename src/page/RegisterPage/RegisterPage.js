@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Form, Button, Alert } from "react-bootstrap";
+import { Container, Form, Button, Alert, Spinner } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 
@@ -15,16 +15,17 @@ const RegisterPage = () => {
     password: "",
     confirmPassword: "",
     policy: false,
+    admin: false,
   });
   const navigate = useNavigate();
   const [passwordError, setPasswordError] = useState("");
   const [policyError, setPolicyError] = useState(false);
-  const { registrationError } = useSelector((state) => state.user);
-  const [buttonDisabled, setButtonDisabled] = useState(true);  
+  const { registrationError, loading } = useSelector((state) => state.user);
 
   const register = (event) => {
     event.preventDefault();
-    const { name, email, password, confirmPassword, policy } = formData;
+
+    const { name, email, password, confirmPassword, policy, admin } = formData;
     const checkConfirmPassword = password === confirmPassword;
     
     if(name === "") {
@@ -32,16 +33,16 @@ const RegisterPage = () => {
       return;
     }
     if (!checkConfirmPassword) {
-      setPasswordError("비밀번호 중복확인이 일치하지 않습니다.");
+      setPasswordError("Password confirmation does not match.");
       return;
     }
     if (!policy) {
-      setPolicyError("이용약관에 동의해주세요");
+      setPolicyError("Please agree to the Terms and Conditions.");
       return;
     }
     setPasswordError("");
     setPolicyError(false);
-    dispatch(registerUser({ name, email, password, navigate }));
+    dispatch(registerUser({ name, email, password, admin, navigate }));
   };
 
   const handleChange = (event) => {
@@ -55,20 +56,6 @@ const RegisterPage = () => {
       setFormData({ ...formData, [id]: value });
     }
   };
-
-  const validateForm = (data) => {
-    return (
-      data.email !== "" &&
-      data.name !== "" &&
-      data.password !== "" &&
-      data.confirmPassword !== "" &&
-      data.policy
-    );
-  };
-
-  useEffect(() => {
-    setButtonDisabled(!validateForm(formData));
-  }, [formData]);
 
   return (
     <Container className="register-area">
@@ -127,15 +114,38 @@ const RegisterPage = () => {
         <Form.Group className="mb-3">
           <Form.Check
             type="checkbox"
-            label="이용약관에 동의합니다"
+            label="Agree to the Terms and Conditions."
             id="policy"
             onChange={handleChange}
             isInvalid={policyError}
             checked={formData.policy}
           />
         </Form.Group>
-        <Button variant="danger" type="submit" disabled={buttonDisabled}>
-          회원가입
+        {/* <Form.Group className="mb-3">
+          <Form.Check
+            type="checkbox"
+            label="관리자 계정"
+            id="admin"
+            onChange={handleChange}
+            isInvalid={policyError}
+            checked={formData.admin}
+          />
+        </Form.Group> */}
+        <Button variant="danger" type="submit" disabled={loading}>
+        {loading ? (
+            <>
+              <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+              />
+              <span className="ms-2">Loading...</span>
+            </>
+          ) : (
+            'Sign up'
+          )}
         </Button>
       </Form>
     </Container>

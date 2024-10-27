@@ -15,7 +15,6 @@ export const loginWithEmail = createAsyncThunk(
 
       if(response.status === 200) {
         sessionStorage.setItem("token", response.data.token);   // session에 token 저장
-        api.defaults.headers["authorization"] = "Bearer " + response.data.token;  // headers에 token 저장, Bearer는 토큰에 붙여주는 규칙(?)
 
         return response.data;
       }
@@ -33,19 +32,25 @@ export const loginWithGoogle = createAsyncThunk(
   async (token, { rejectWithValue }) => {}
 );
 
-export const logout = () => (dispatch) => {};
+export const logout = () => (dispatch) => {
+  sessionStorage.removeItem("token");
+  window.location.reload();
+};
 
 export const registerUser = createAsyncThunk(
   "user/registerUser",
   async (
-    { email, name, password, navigate },
+    { email, name, password, admin, navigate },
     { dispatch, rejectWithValue }
   ) => {
     try {
+      const level = admin ? "admin" : "customer";
+
       const response = await api.post("/user", {
         email,
         name,
         password,
+        level,
       });
       const status = response.status;
 
@@ -79,7 +84,17 @@ export const registerUser = createAsyncThunk(
 
 export const loginWithToken = createAsyncThunk(
   "user/loginWithToken",
-  async (_, { rejectWithValue }) => {}
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/user/session");
+
+      if(response.status === 200) {
+        return response.data;
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
 );
 
 const userSlice = createSlice({
@@ -114,6 +129,7 @@ const userSlice = createSlice({
     .addCase(registerUser.rejected, (state, action) => {
       // 회원가입 rejected
       state.registrationError = action.payload;
+      state.loading = false;
 
     })
     .addCase(loginWithEmail.pending, (state) => {
@@ -130,6 +146,19 @@ const userSlice = createSlice({
     })
     .addCase(loginWithEmail.rejected, (state, action) => {
       // 로그인 rejected
+      state.loginError = action.payload;
+      state.loading = false;
+      state.user = null;
+
+    })
+    .addCase(loginWithToken.fulfilled, (state, action) => {
+      // 토큰 로그인 fulfilled
+      state.loading = false;
+      state.user = action.payload.user;
+
+    })
+    .addCase(loginWithToken.rejected, (state, action) => {
+      // 토큰 로그인 rejected
       state.loginError = action.payload;
       state.loading = false;
       state.user = null;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Form, Button, Alert } from "react-bootstrap";
+import { Container, Form, Button, Alert, Spinner } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { GoogleLogin } from "@react-oauth/google";
@@ -12,13 +12,13 @@ const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, loginError } = useSelector((state) => state.user);
+  const { user, loginError, loading } = useSelector((state) => state.user);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-
-  }, []);
+    dispatch(clearErrors());
+  }, [dispatch]);
 
   const handleLoginWithEmail = (event) => {
     event.preventDefault();
@@ -65,16 +65,29 @@ const Login = () => {
             />
           </Form.Group>
           <div className="display-space-between login-button-area">
-            <Button variant="danger" type="submit">
-              Login
+            <Button variant="danger" type="submit" disabled={loading}>
+            {loading ? (
+            <>
+              <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+              />
+              <span className="ms-2">Loading...</span>
+            </>
+          ) : (
+                'Login'
+              )}
             </Button>
             <div>
-              아직 계정이 없으세요?<Link to="/register">회원가입 하기</Link>{" "}
+              Don't have an account? <Link to="/register">Sign up</Link>{" "}
             </div>
           </div>
 
           <div className="text-align-center mt-2">
-            <p>-외부 계정으로 로그인하기-</p>
+            <p>-Login with external account-</p>
             <div className="display-center">
               <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
                 <GoogleLogin
