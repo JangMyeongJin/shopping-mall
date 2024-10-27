@@ -23,7 +23,7 @@ app.use(cors());
 app.use(bodyParser.json()); // parse application/json
 app.use(bodyParser.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
 
-app.use('/api', indexRouter);
+app.use("/api", indexRouter);
 
 app.listen(port, "0.0.0.0", () => {
     console.log(`server running on port ${port}`);
