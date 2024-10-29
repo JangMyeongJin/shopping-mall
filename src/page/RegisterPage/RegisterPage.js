@@ -121,7 +121,7 @@ const RegisterPage = () => {
             checked={formData.policy}
           />
         </Form.Group>
-        {/* <Form.Group className="mb-3">
+        <Form.Group className="mb-3">
           <Form.Check
             type="checkbox"
             label="관리자 계정"
@@ -130,7 +130,7 @@ const RegisterPage = () => {
             isInvalid={policyError}
             checked={formData.admin}
           />
-        </Form.Group> */}
+        </Form.Group>
         <Button variant="danger" type="submit" disabled={loading}>
         {loading ? (
             <>

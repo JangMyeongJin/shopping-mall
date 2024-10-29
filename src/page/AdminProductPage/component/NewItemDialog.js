@@ -8,7 +8,11 @@ import {
   clearError,
   createProduct,
   editProduct,
+  getCategories,
+  putCategories,
+  deleteCategory,
 } from "../../../features/product/productSlice";
+import FormCheckInput from "react-bootstrap/esm/FormCheckInput";
 
 const InitialFormData = {
   name: "",
@@ -22,7 +26,7 @@ const InitialFormData = {
 };
 
 const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
-  const { error, success, selectedProduct } = useSelector(
+  const { error, success, selectedProduct, categories, categoryLoading } = useSelector(
     (state) => state.product
   );
   const [formData, setFormData] = useState(
@@ -31,10 +35,19 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
   const [stock, setStock] = useState([]);
   const dispatch = useDispatch();
   const [stockError, setStockError] = useState(false);
+  const [priceError, setPriceError] = useState(false);
+  const [categoryError, setCategoryError] = useState(false);
+
+  const [addCategory, setAddCategory] = useState("");
 
   useEffect(() => {
     if (success) setShowDialog(false);
   }, [success]);
+
+  useEffect(() => {
+    setAddCategory("");
+    dispatch(getCategories());
+  }, [categoryLoading]);
 
   useEffect(() => {
     if (error || !success) {
@@ -59,38 +72,83 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
   const handleClose = () => {
     //모든걸 초기화시키고;
     // 다이얼로그 닫아주기
+    setStockError(false);
+    setPriceError(false);
+    setCategoryError(false);
+    setFormData({ ...InitialFormData });
+    setStock([]);
+    setAddCategory("");
+    setShowDialog(false); 
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    setStockError(false);
+    setPriceError(false);
+    setCategoryError(false);
+
     //재고를 입력했는지 확인, 아니면 에러
+    if (stock.length === 0) {
+      return setStockError(true);
+    }
+
+    if (formData.price <= 0) {
+      return setPriceError(true);
+    }
+
+    if (formData.category.length === 0) {
+      return setCategoryError(true);
+    } 
+
     // 재고를 배열에서 객체로 바꿔주기
     // [['M',2]] 에서 {M:2}로
+    const totalStock = stock.reduce((total, item) => {
+      return { ...total, [item[0]]: parseInt(item[1]) };
+    }, {});
+
     if (mode === "new") {
       //새 상품 만들기
+      dispatch(createProduct({ ...formData, stock: totalStock }));
     } else {
       // 상품 수정하기
     }
   };
 
   const handleChange = (event) => {
+    const { id, value } = event.target;
+
     //form에 데이터 넣어주기
+    setFormData({
+      ...formData,  // ... 비구조화 할당
+      [id]: value,
+    });
   };
 
   const addStock = () => {
     //재고타입 추가시 배열에 새 배열 추가
+    setStock([...stock, []]);
   };
 
   const deleteStock = (idx) => {
     //재고 삭제하기
+    const newStock = stock.filter((item, index) => index !== idx);
+    setStock(newStock);
   };
 
   const handleSizeChange = (value, index) => {
     //  재고 사이즈 변환하기
+    const newStock = [...stock];
+    newStock[index][0] = value;
+
+    setStock(newStock);
   };
 
   const handleStockChange = (value, index) => {
     //재고 수량 변환하기
+    const newStock = [...stock];
+    newStock[index][1] = value;
+
+    setStock(newStock);
   };
 
   const onHandleCategory = (event) => {
@@ -112,6 +170,23 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
 
   const uploadImage = (url) => {
     //이미지 업로드
+    setFormData({
+      ...formData,
+      image: url,
+    });
+  };
+
+  const handleAddCategory = (event) => {
+    setAddCategory(event.target.value);
+  };
+
+  const submitNewCategory = () => {
+    // 새로운 카테고리 추가
+    dispatch(putCategories({category: addCategory}));
+  };
+
+  const handleDeleteCategory = (id) => {
+    dispatch(deleteCategory({id: id}));
   };
 
   return (
@@ -169,7 +244,7 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
         <Form.Group className="mb-3" controlId="stock">
           <Form.Label className="mr-1">Stock</Form.Label>
           {stockError && (
-            <span className="error-message">재고를 추가해주세요</span>
+            <span className="error-message">Please add stock</span>
           )}
           <Button size="sm" onClick={addStock}>
             Add +
@@ -230,13 +305,13 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
         <Form.Group className="mb-3" controlId="Image" required>
           <Form.Label>Image</Form.Label>
           <CloudinaryUploadWidget uploadImage={uploadImage} />
-
           <img
             id="uploadedimage"
-            src={formData.image}
+            src={formData.image || ""}
             className="upload-image mt-2"
             alt="uploadedimage"
-          ></img>
+            style={{ display: formData.image ? "block" : "none" }}
+          />
         </Form.Group>
 
         <Row className="mb-3">
@@ -249,23 +324,58 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
               type="number"
               placeholder="0"
             />
+            {priceError && (
+              <span className="error-message">Please add price</span>
+            )}
           </Form.Group>
 
           <Form.Group as={Col} controlId="category">
             <Form.Label>Category</Form.Label>
-            <Form.Control
-              as="select"
-              multiple
-              onChange={onHandleCategory}
-              value={formData.category}
-              required
-            >
-              {CATEGORY.map((item, idx) => (
-                <option key={idx} value={item.toLowerCase()}>
-                  {item}
-                </option>
+            {categoryError && (
+              <div><span className="error-message">Please check category</span></div>
+            )}
+            <Col style={{height: "150px", overflowY: "auto"}}>
+              {categories.map((item, idx) => (
+                <div style={{display: "flex", justifyContent: "space-between", "marginBottom": "0.2rem"}}>
+                <Form.Check
+                  key={idx}
+                  type="checkbox"
+                  id={`category-${idx}`}
+                  label={item.name}
+                  value={item.name.toLowerCase()}
+                  checked={formData.category.includes(item.name.toLowerCase())}
+                  onChange={onHandleCategory}
+                />
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    style={{ padding: "0.1rem 0.3rem", fontSize: "0.7rem"}}
+                    onClick={() => handleDeleteCategory(item._id)}
+                  >
+                    -
+                  </Button>
+                </div>
               ))}
-            </Form.Control>
+            </Col>
+            <Col style={{marginTop: "0.5rem"}}>
+            <div style={{display: "flex", justifyContent: "space-between"}}>
+              <h6>Add Category</h6>
+              <Button 
+                variant="secondary" 
+                size="sm"
+                onClick={submitNewCategory}
+              >
+                Add
+              </Button>
+            </div>
+              <Form.Control
+                onChange={handleAddCategory}
+                type="string"
+                placeholder="Add Category"
+                value={addCategory}
+              />
+              
+            </Col>
           </Form.Group>
 
           <Form.Group as={Col} controlId="status">
