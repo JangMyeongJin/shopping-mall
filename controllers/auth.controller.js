@@ -8,7 +8,6 @@ const authController = {};
 authController.authhenticate = async (req, res, next) => {
     try {
         const tokenString = req.headers.authorization;
-
         if(!tokenString) {
             throw new Error("Token is undefined");
         }

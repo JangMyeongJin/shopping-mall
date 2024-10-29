@@ -24,6 +24,14 @@ productController.createProduct = async (req, res) => {
         });
 
     }catch(err) {
+        // duplicate key 에러 처리
+        if (err.code === 11000) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Sku number already exists"
+            });
+        }
+
         res.status(400).json({
             status: "fail",
             message: err.message
