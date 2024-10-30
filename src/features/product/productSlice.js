@@ -5,7 +5,17 @@ import { showToastMessage } from "../common/uiSlice";
 // 비동기 액션 생성
 export const getProductList = createAsyncThunk(
   "products/getProductList",
-  async (query, { rejectWithValue }) => {}
+  async (query, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/product");
+      if (response.status !== 200) {
+        throw new Error(response.error);
+      }
+      return response.data.products;
+    } catch (err) {
+      return rejectWithValue(err.error);
+    }
+  }
 );
 
 export const getProductDetail = createAsyncThunk(
@@ -49,7 +59,7 @@ export const getCategories = createAsyncThunk(
       if (response.status !== 200) {
         throw new Error(response.error);
       }
-      console.log(response);
+
       return response.data.data;
     } catch (err) {
       return rejectWithValue(err.message);
@@ -127,7 +137,7 @@ const productSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
       state.success = false;
-      })
+    })
       .addCase(getCategories.fulfilled, (state, action) => {
         state.categories = action.payload;
       })
@@ -152,6 +162,18 @@ const productSlice = createSlice({
       })
       .addCase(deleteCategory.rejected, (state, action) => {
         state.categoryLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(getProductList.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getProductList.fulfilled, (state, action) => {
+        state.productList = action.payload;
+        state.loading = false;
+        state.error = "";
+      })
+      .addCase(getProductList.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       })
   },
