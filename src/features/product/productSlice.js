@@ -193,10 +193,12 @@ const productSlice = createSlice({
         state.loading = true;
       })
       .addCase(getProductList.fulfilled, (state, action) => {
+        
+        state.loading = false;
         state.productList = action.payload.products;
         state.totalPageNum = action.payload.totalPageNum;
-        state.loading = false;
         state.error = "";
+        console.log(state.loading);
       })
       .addCase(getProductList.rejected, (state, action) => {
         state.loading = false;

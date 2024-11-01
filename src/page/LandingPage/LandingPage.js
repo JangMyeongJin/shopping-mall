@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import ProductCard from "./components/ProductCard";
-import { Row, Col, Container } from "react-bootstrap";
+import { Row, Col, Container, Spinner } from "react-bootstrap";
 import { useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getProductList } from "../../features/product/productSlice";
@@ -8,6 +8,7 @@ import { getProductList } from "../../features/product/productSlice";
 const LandingPage = () => {
   const dispatch = useDispatch();
 
+  const loading = useSelector((state) => state.product.loading);
   const productList = useSelector((state) => state.product.productList);
   const [query] = useSearchParams();
   const name = query.get("name");
@@ -19,8 +20,19 @@ const LandingPage = () => {
     );
   }, [query]);
 
+  useEffect(() => {
+    console.log("LandingPage loading : ", loading);
+  }, [loading]);
+
   return (
     <Container>
+       {loading ? (
+        <div className="text-center my-5">
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        </div>
+      ) : (
       <Row>
         {productList.length > 0 ? (
           productList.map((item) => (
@@ -36,8 +48,9 @@ const LandingPage = () => {
               <h2>No products match '{name}'</h2>
             )}
           </div>
-        )}
-      </Row>
+          )}
+        </Row>
+      )}
     </Container>
   );
 };
