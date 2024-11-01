@@ -13,4 +13,16 @@ router.get("/",
     productController.getProducts
 );
 
+router.put("/:id",
+    authController.authhenticate,
+    authController.checkAdminPermission,
+    productController.updateProduct
+);
+
+router.delete("/:id",
+    authController.authhenticate,
+    authController.checkAdminPermission,
+    productController.deleteProduct
+);
+
 module.exports = router;

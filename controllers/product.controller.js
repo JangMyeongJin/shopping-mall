@@ -46,7 +46,7 @@ productController.getProducts = async (req, res) => {
         let response = {status: "ok"};
 
         let query = Product.find(cond);
-        console.log(page);
+        
         if(page) {
             query = query.skip((page - 1) * 10).limit(10);
 
@@ -62,6 +62,53 @@ productController.getProducts = async (req, res) => {
 
         res.status(200).json(response);
         
+    } catch (err) {
+        res.status(400).json({
+            status: "fail",
+            message: err.message
+        });
+    }
+}
+
+productController.updateProduct = async (req, res) => {
+    try {
+        const {id} = req.params;
+        const {sku, name, image, size, category, description, price, stock} = req.body;
+
+        const product = await Product.findByIdAndUpdate(
+            {
+                _id: id
+            },
+            {
+                sku, name, image, size, category, description, price, stock
+            },
+            {
+                new: true
+            }
+        );
+
+        res.status(200).json({
+            status: "ok",
+            product
+        });
+
+    } catch (err) {
+        res.status(400).json({
+            status: "fail",
+            message: err.message
+        });
+    }
+}
+
+productController.deleteProduct = async (req, res) => {
+    try {
+        const {id} = req.params;
+
+        await Product.findByIdAndDelete(id);
+
+        res.status(200).json({
+            status: "ok"
+        });
     } catch (err) {
         res.status(400).json({
             status: "fail",
