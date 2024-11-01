@@ -11,7 +11,6 @@ export const getProductList = createAsyncThunk(
       if (response.status !== 200) {
         throw new Error(response.error);
       }
-      console.log(response);
       return response.data;
     } catch (err) {
       return rejectWithValue(err.error);
@@ -34,6 +33,7 @@ export const createProduct = createAsyncThunk(
         throw new Error(response.error);
       }
       dispatch(showToastMessage({ message: "Success add new Item", status: "success" }));
+      dispatch(getProductList({page: 1}));
       return response.data.data;
     } catch (err) {
       return rejectWithValue(err.message);
@@ -43,12 +43,36 @@ export const createProduct = createAsyncThunk(
 
 export const deleteProduct = createAsyncThunk(
   "products/deleteProduct",
-  async (id, { dispatch, rejectWithValue }) => {}
+  async (id, { dispatch, rejectWithValue }) => {
+    try{
+      const response = await api.delete(`/product/${id}`);
+      if (response.status !== 200) {
+        throw new Error(response.error);
+      }
+      dispatch(getProductList({page: 1}));
+      dispatch(showToastMessage({ message: "Delete Item", status: "success" }));
+      return response.data.data;
+    }catch (err) {
+      return rejectWithValue(err.error);
+    }
+  }
 );
 
 export const editProduct = createAsyncThunk(
   "products/editProduct",
-  async ({ id, ...formData }, { dispatch, rejectWithValue }) => {}
+  async ({ id, ...formData }, { dispatch, rejectWithValue }) => {
+    try{
+      const response = await api.put(`/product/${id}`, formData);
+      if (response.status !== 200) {
+        throw new Error(response.error);
+      }
+      dispatch(showToastMessage({ message: "Success edit Item", status: "success" }));
+      dispatch(getProductList({page: 1}));
+      return response.data.data;
+    }catch (err) {
+      return rejectWithValue(err.error);
+    }
+  }
 );
 
 // 카테고리 목록 조회 추가
@@ -178,6 +202,19 @@ const productSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      .addCase(editProduct.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(editProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.error = "";
+      })
+      .addCase(editProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.success = false;
+      });
   },
 });
 

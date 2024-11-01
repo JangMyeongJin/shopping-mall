@@ -41,7 +41,10 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
   const [addCategory, setAddCategory] = useState("");
 
   useEffect(() => {
-    if (success) setShowDialog(false);
+    console.log("success : ", success);
+    if (success) {
+      setShowDialog(false);
+    }
   }, [success]);
 
   useEffect(() => {
@@ -111,6 +114,7 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
       dispatch(createProduct({ ...formData, stock: totalStock }));
     } else {
       // 상품 수정하기
+      dispatch(editProduct({ id: selectedProduct._id, ...formData, stock: totalStock }));
     }
   };
 
