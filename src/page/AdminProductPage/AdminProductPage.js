@@ -64,8 +64,9 @@ const AdminProductPage = () => {
     //edit모드로 설정하고
     // 아이템 수정다이얼로그 열어주기
     setMode("edit");
-    dispatch(setSelectedProduct(product));
     setShowDialog(true);
+    dispatch(setSelectedProduct(product));
+    
   };
 
   const handleClickNewItem = () => {

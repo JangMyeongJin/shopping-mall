@@ -203,24 +203,24 @@ const productSlice = createSlice({
         state.loading = true;
       })
       .addCase(getProductList.fulfilled, (state, action) => {
-        
         state.loading = false;
         state.productList = action.payload.products;
         state.totalPageNum = action.payload.totalPageNum;
         state.error = "";
-        console.log(state.loading);
       })
       .addCase(getProductList.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
       .addCase(editProduct.pending, (state) => {
+        state.success = false;
         state.loading = true;
       })
       .addCase(editProduct.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
         state.error = "";
+        console.log(state.success);
       })
       .addCase(editProduct.rejected, (state, action) => {
         state.loading = false;
