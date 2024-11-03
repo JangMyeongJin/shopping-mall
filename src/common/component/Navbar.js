@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
 import {
@@ -46,6 +46,9 @@ const Navbar = ({ user }) => {
       dispatch(logout());
     }
   };
+  // useEffect(() => {
+  //   dispatch(getCartList());
+  // }, []);
 
   return (
     <div>
