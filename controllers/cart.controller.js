@@ -21,18 +21,14 @@ cartController.createCart = async (req, res) => {
         );
 
         if(cartItem) {
-            // 수량 증가는 나중에 구현
-            // cartItem.qty += qty;
-
             throw new Error("Item already exists");
         }
-        console.log(productId, size, qty);
         cart.items = [...cart.items, {productId, size, qty}];
 
         await cart.save();
 
         res.status(200).json({
-            status: "success",
+            status: "ok",
             cart,
             cartItemQty: cart.items.length
         });
@@ -42,6 +38,91 @@ cartController.createCart = async (req, res) => {
             message: err.message
         });
     }
+}
+
+cartController.getCart = async (req, res) => {
+    try {
+        const {userId} = req;
+
+        // populate = 참조하는 모델의 데이터를 가져오는 것
+        const cart = await Cart.findOne({userId}).populate({
+            path:"items",
+            populate:{
+                path:"productId",
+                model:"Product",
+            }
+        });
+
+        res.status(200).json({
+            status: "ok",
+            data: cart.items
+        });
+    } catch (err) {
+        res.status(400).json({
+            status: "fail",
+            message: err.message
+        });
+    }
+}
+
+cartController.getCartCount = async (req, res) => {
+    try {
+        const {userId} = req;
+        const cart = await Cart.findOne({userId});
+        res.status(200).json({
+        status: "ok",
+        count: cart.items.length
+        });
+    } catch (err) {
+        res.status(400).json({
+            status: "fail",
+            message: err.message
+        });
+    }
+}
+
+cartController.deleteCartItem = async (req, res) => {
+    try {
+        const {itemId} = req.params;
+        const {userId} = req;
+
+        const cart = await Cart.findOne({userId});
+        cart.items = cart.items.filter(item => !item._id.equals(itemId));
+        await cart.save();
+
+        res.status(200).json({
+            status: "ok",
+            message: "Item deleted"
+        });
+    } catch (err) {
+        res.status(400).json({
+            status: "fail",
+            message: err.message
+        });
+    }
+}
+
+cartController.updateCartItem = async (req, res) => {
+    try {
+        const {itemId} = req.params;
+        const {userId} = req;
+        const {qty} = req.body;
+
+        const cart = await Cart.findOne({userId});
+        cart.items = cart.items.map(item => item._id.equals(itemId) ? {...item, qty} : item);
+        await cart.save();
+
+        res.status(200).json({
+            status: "ok",
+            message: "Item updated"
+        });
+    } catch (err) {
+        res.status(400).json({
+            status: "fail",
+            message: err.message
+        });
+    }
+
 }
 
 module.exports = cartController;
