@@ -20,10 +20,6 @@ const LandingPage = () => {
     );
   }, [query]);
 
-  useEffect(() => {
-    console.log("LandingPage loading : ", loading);
-  }, [loading]);
-
   return (
     <Container>
        {loading ? (
