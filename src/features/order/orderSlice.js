@@ -16,7 +16,19 @@ const initialState = {
 // Async thunks
 export const createOrder = createAsyncThunk(
   "order/createOrder",
-  async (payload, { dispatch, rejectWithValue }) => {}
+  async (payload, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await api.post("/order", payload);
+      if (response.status !== 200) {
+        throw new Error("Failed to create order");
+      }
+      dispatch(showToastMessage({message: "Order created successfully", status: "success"}));
+      
+      return response.data.orderNum;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
 );
 
 export const getOrder = createAsyncThunk(
@@ -43,7 +55,21 @@ const orderSlice = createSlice({
       state.selectedOrder = action.payload;
     },
   },
-  extraReducers: (builder) => {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(createOrder.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createOrder.fulfilled, (state, action) => {
+        state.loading = false;
+        state.orderNum = action.payload;
+        state.error = "";
+      })
+      .addCase(createOrder.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  },
 });
 
 export const { setSelectedOrder } = orderSlice.actions;
