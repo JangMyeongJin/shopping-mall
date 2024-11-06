@@ -1,15 +1,17 @@
 const mongoose = require("mongoose");
+const Cart = require("./Cart");
 
 const orderSchema = new mongoose.Schema({
     userId: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
-    address: {type: String, required: true},
-    phone: {type: String, required: true},
+    shipto: {type: Object, required: true},
+    contact: {type: Object, required: true},
     totalPrice: {type: Number, required: true},
     status: {type: String, default: "preparing"},
+    orderNum: {type: String},
     items:[{
         productId: {type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true},
         size: {type: String, required: true},
-        qty: {type: Number, default: 1},
+        qty: {type: Number},
         price: {type: Number, required: true}   // 결재 당시 가격
     }]
 },{
@@ -23,6 +25,13 @@ orderSchema.methods.toJSON = function() {
     delete obj.updatedAt;
     return obj;
 }
+
+orderSchema.post("save", async function() {
+    const cart = await Cart.findOne({userId: this.userId});
+    cart.items = [];
+    await cart.save();
+
+});
 
 const Order = mongoose.model("Order", orderSchema);
 

@@ -135,4 +135,35 @@ productController.getProductById = async (req, res) => {
     }
 }
 
+productController.checkStock = async (item) => {
+    const product = await Product.findById(item.productId);
+    if (product.stock[item.size] < item.qty) {
+        return {isVerify: false, message: `${product.name} ${item.size} size is out of stock`};
+    } else {
+        const newStock = {...product.stock};
+        newStock[item.size] -= item.qty;
+        
+        product.stock = newStock;
+        await product.save();
+
+        return {isVerify: true};
+    }
+}
+
+productController.checkItemStock = async (orderList) => {
+    const result = [];
+
+    // Promise.all 비동기 로직을 병렬로 처리
+    await Promise.all(
+        orderList.map(async (item) => {
+            const checkStock = await productController.checkStock(item);
+            if (!checkStock.isVerify) {
+                result.push({item, message: checkStock.message});
+            }
+        })
+    );
+
+    return result;
+}
+
 module.exports = productController;
