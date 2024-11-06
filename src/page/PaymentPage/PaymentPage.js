@@ -33,6 +33,13 @@ const PaymentPage = () => {
 
   useEffect(() => {
     // 오더번호를 받으면 어디로 갈까?
+    if(firstLoading){
+      setFirstLoading(false);
+    }else {
+      if(orderNum !== ""){
+        navigate("/payment/success");
+      }
+    }
   }, [orderNum]);
 
   const handleSubmit = (event) => {
@@ -44,8 +51,8 @@ const PaymentPage = () => {
       contact: {firstName, lastName, contact},
       orderList: cartList.map((item) => ({
         productId: item.productId._id,
-        size: item.productId.size,
-        qty: item.quantity,
+        size: item.size,
+        qty: item.qty,
         price: item.productId.price,
       })),
       totalPrice 
