@@ -37,6 +37,7 @@ const AdminOrderPage = () => {
   useEffect(() => {
     dispatch(getOrderList({ ...searchQuery }));
   }, [query]);
+  console.log("orderList : ", orderList);
 
   useEffect(() => {
     if (searchQuery.ordernum === "") {

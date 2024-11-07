@@ -7,6 +7,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import "./style/login.style.css";
 import { loginWithEmail, loginWithGoogle } from "../../features/user/userSlice";
 import { clearErrors } from "../../features/user/userSlice";
+
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const Login = () => {
@@ -29,6 +30,8 @@ const Login = () => {
 
   const handleGoogleLogin = async (googleData) => {
     //구글 로그인 하기
+    console.log(googleData);
+
   };
 
   // 다른 로그인 방법이 있기 때문에 Login 페이지에서 메인페이지로 이동

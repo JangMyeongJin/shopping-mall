@@ -6,14 +6,14 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./features/store";
-// const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
 
 ReactDOM.render(
-  <Provider store={store}>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </Provider>,
+    <Provider store={store}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </Provider>,
   document.getElementById("root")
 );
 
