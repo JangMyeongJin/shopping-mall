@@ -12,6 +12,7 @@ import {
   setSelectedProduct,
 } from "../../features/product/productSlice";
 
+
 const AdminProductPage = () => {
   const navigate = useNavigate();
   const [query] = useSearchParams();  // url 파라미터 읽어오기
