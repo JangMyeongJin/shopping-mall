@@ -144,26 +144,38 @@ productController.checkStock = async (item) => {
         newStock[item.size] -= item.qty;
         
         product.stock = newStock;
-        await product.save();
 
-        return {isVerify: true};
+        return {isVerify: true, product};
     }
 }
 
 productController.checkItemStock = async (orderList) => {
     const result = [];
+    let newProduct = [];
 
     // Promise.all 비동기 로직을 병렬로 처리
     await Promise.all(
+        
         orderList.map(async (item) => {
             const checkStock = await productController.checkStock(item);
             if (!checkStock.isVerify) {
                 result.push({item, message: checkStock.message});
+            }else {
+                newProduct.push(checkStock.product);
             }
         })
     );
 
-    return result;
+    if(result.length > 0) {
+        return result;
+    }else {
+        newProduct.map(async (product) => {
+            await product.save();
+        });
+    }
+
+    return newProduct;
 }
+
 
 module.exports = productController;

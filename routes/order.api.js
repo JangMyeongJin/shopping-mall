@@ -8,4 +8,15 @@ router.post("/",
     orderController.createOrder
 );
 
+router.get("/", 
+    authController.authhenticate, 
+    orderController.getOrders
+);
+
+router.get("/admin", 
+    authController.authhenticate,
+    authController.checkAdminPermission,
+    orderController.getAdminOrders
+);
+
 module.exports = router;
