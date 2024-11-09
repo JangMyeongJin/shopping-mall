@@ -69,10 +69,17 @@ cartController.getCartCount = async (req, res) => {
     try {
         const {userId} = req;
         const cart = await Cart.findOne({userId});
-        res.status(200).json({
-        status: "ok",
-        count: cart.items.length
-        });
+        if(cart) {
+            res.status(200).json({
+                status: "ok",
+                count: cart.items.length
+            });
+        } else {
+            res.status(200).json({
+                status: "ok",
+                count: 0
+            });
+        }
     } catch (err) {
         res.status(400).json({
             status: "fail",

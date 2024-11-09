@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 require("dotenv").config();
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
@@ -28,6 +29,7 @@ userSchema.methods.generateToken = function() {
     });
     return token;
 };
+
 
 const User = mongoose.model("User", userSchema);
 

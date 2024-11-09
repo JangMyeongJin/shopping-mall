@@ -1,4 +1,5 @@
 const Order = require("../models/Order");
+const Product = require("../models/Product");
 const productController = require("./product.controller");
 const { randomStringGenerator } = require("../utils/randomStringGenerator");
 
@@ -45,27 +46,29 @@ orderController.getOrders = async (req, res) => {
         const orders = await Order.find({ userId });
 
         
-        await Promise.all(orders.map(async (order) => {
-            const newItems = [];
-            order.items.map(async (item) => {
-                const product = await productController.getProductById(item._id);
-                console.log("item : ", item);
-                console.log("product : ", product);
-                const newItem = {
-                    ...item,
-                    productName: product.name,
-                    productImg: product.image
+        const updatedOrders = await Promise.all(orders.map(async (order) => {
+            const updatedItems = await Promise.all(order.items.map(async (item) => {
+                const product = await Product.findOne({
+                    _id: item.productId
+                });
+                return {
+                    ...item.toObject(), 
+                    product: {           
+                        name: product?.name,
+                        image: product?.image
+                    }
                 }
-                console.log("newItem : ", newItem);
-                newItems.push(newItem);
-            });
-            order.items = newItems;
+            }));
+            return {
+                ...order.toObject(),
+                items: updatedItems
+            };
         }));
 
 
         res.status(200).json({
             status: "ok",
-            orders,
+            orders: updatedOrders,
         });
     } catch (err) {
         res.status(400).json({
@@ -77,18 +80,19 @@ orderController.getOrders = async (req, res) => {
 
 orderController.getAdminOrders = async (req, res) => {
     try {
-        const { page, ordernum } = req.query;
+        const { page, ordernum, limit } = req.query;
         const cond = ordernum ? {orderNum: {$regex: ordernum, $options: "i"}} : {};
         let response = {status: "ok"};
 
         let query = Order.find(cond);
 
         if(page) {
-            query = query.skip((page - 1) * 3).limit(3);
+            query = query.skip((page - 1) * limit).limit(limit);
 
             const total = await Order.find(cond).countDocuments();
-            const totalPages = Math.ceil(total / 3);
+            const totalPages = Math.ceil(total / limit);
 
+            response.totalCount = total;
             response.totalPageNum = totalPages;
         }
 
@@ -103,6 +107,19 @@ orderController.getAdminOrders = async (req, res) => {
             status: "error",
             message: err.message,
         });
+    }
+}
+
+orderController.updateOrder = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const { id } = req.params;
+
+        await Order.findByIdAndUpdate(id, {status: status});
+
+        res.status(200).json({status: "ok"});
+    } catch (err) {
+        res.status(400).json({status: "error", message: err.message});
     }
 }
 

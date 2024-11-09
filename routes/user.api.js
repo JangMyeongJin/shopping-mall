@@ -12,5 +12,8 @@ router.post("/login", userController.loginUser);
 // token 유효성 검사
 router.get("/session", authController.authhenticate, userController.getUser);
 
+// 구글 로그인
+router.post("/google", userController.googleLogin);
+
 module.exports = router;
 

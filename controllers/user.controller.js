@@ -1,5 +1,10 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const {OAuth2Client} = require("google-auth-library");
+const {randomStringGenerator} = require("../utils/randomStringGenerator");
+
+require("dotenv").config();
+const {GOOGLE_CLIENT_ID} = process.env.GOOGLE_CLIENT_ID;
 
 const saltRounds = 10;
 
@@ -86,6 +91,52 @@ userController.getUser = async (req,res) => {
         res.status(200).json({
             status: "ok",
             user
+        });
+
+    }catch(err) {
+        res.status(400).json({
+            status: "fail",
+            message: err.message
+        });
+    }
+}
+
+userController.googleLogin = async (req, res) => {
+    try {
+        const {token} = req.body;
+        const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+
+        const ticket = await googleClient.verifyIdToken({
+            idToken: token,
+            audience: GOOGLE_CLIENT_ID
+        });
+
+        const {email, name} = ticket.getPayload();
+
+        let user = await User.findOne({email});
+
+        if(!user) {
+            const randomPassword = randomStringGenerator();
+
+            const salt = bcrypt.genSaltSync(saltRounds);
+            const hash = bcrypt.hashSync(randomPassword, salt);
+
+            user = new User({
+                email,
+                name,
+                password: hash
+            });
+            
+        }
+
+        await user.save();
+
+        const sessionToken = user.generateToken();
+
+        res.status(200).json({
+            status: "ok",
+            user,
+            token: sessionToken
         });
 
     }catch(err) {
