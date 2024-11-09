@@ -157,7 +157,6 @@ productController.checkItemStock = async (orderList) => {
 
     // Promise.all 비동기 로직을 병렬로 처리
     await Promise.all(
-        
         orderList.map(async (item) => {
             const checkStock = await productController.checkStock(item);
             if (!checkStock.isVerify) {
@@ -176,7 +175,7 @@ productController.checkItemStock = async (orderList) => {
         });
     }
 
-    return newProduct;
+    return result;
 }
 
 
