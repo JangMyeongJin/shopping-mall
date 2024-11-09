@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Spinner } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import OrderStatusCard from "./component/OrderStatusCard";
 import "./style/orderStatus.style.css";
@@ -8,11 +8,20 @@ import { getOrder } from "../../features/order/orderSlice";
 
 const MyPage = () => {
   const dispatch = useDispatch();
-  const { orderList } = useSelector((state) => state.order);
-  console.log(orderList);
+  const { orderList, loading } = useSelector((state) => state.order);
   useEffect(() => {
     dispatch(getOrder());
   }, [dispatch]);
+
+  if (loading) {
+    return (
+      <div className="text-center my-5">
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        </div>
+    );
+  }
 
   if (orderList?.length === 0) {
     return (
