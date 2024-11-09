@@ -96,7 +96,7 @@ const Login = () => {
                 <GoogleLogin
                   onSuccess={handleGoogleLogin}
                   onError={() => {
-                    console.log("Login Failed");
+                    alert("Login Failed");
                   }}
                 />
               </GoogleOAuthProvider>
