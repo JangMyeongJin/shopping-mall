@@ -7,7 +7,6 @@ export const getProductList = createAsyncThunk(
   "products/getProductList",
   async (query, { rejectWithValue }) => {
     try {
-      console.log(query);
       const response = await api.get("/product", {params: {...query}});
 
       return response.data;
@@ -147,7 +146,6 @@ const productSlice = createSlice({
       state.loading = true;
     })
     .addCase(createProduct.fulfilled, (state, action) => {
-      console.log("success");
       state.error = "";
       state.loading = false;
       state.success = true;

@@ -10,8 +10,6 @@ const OrderDetailDialog = ({ open, handleClose }) => {
   const [orderStatus, setOrderStatus] = useState(selectedOrder.status);
   const dispatch = useDispatch();
 
-  console.log("selectedOrder : ", selectedOrder);
-
   const handleStatusChange = (event) => {
     setOrderStatus(event.target.value);
   };
