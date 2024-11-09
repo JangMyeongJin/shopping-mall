@@ -12,12 +12,9 @@ export const loginWithEmail = createAsyncThunk(
         email,
         password,
       });
+      sessionStorage.setItem("token", response.data.token);   // session에 token 저장
 
-      if(response.status === 200) {
-        sessionStorage.setItem("token", response.data.token);   // session에 token 저장
-
-        return response.data;
-      }
+      return response.data;
 
     } catch (error) {
 
@@ -29,7 +26,18 @@ export const loginWithEmail = createAsyncThunk(
 
 export const loginWithGoogle = createAsyncThunk(
   "user/loginWithGoogle",
-  async (token, { rejectWithValue }) => {}
+  async (token, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/user/google", {
+        token,
+      });
+
+      sessionStorage.setItem("token", response.data.token);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
 );
 
 export const logout = () => (dispatch) => {
@@ -52,17 +60,14 @@ export const registerUser = createAsyncThunk(
         password,
         level,
       });
-      const status = response.status;
 
-      if(status === 200) {
-        dispatch(showToastMessage({
-          message: "Success for Sing up", 
-          status: "success"
-        }));
-        navigate("/login");
+      dispatch(showToastMessage({
+        message: "Success for Sing up", 
+        status: "success"
+      }));
+      navigate("/login");
 
-        return response.data.data;
-      }
+      return response.data.data;
       
     } catch (error) {
       const status = error.status;
@@ -88,9 +93,8 @@ export const loginWithToken = createAsyncThunk(
     try {
       const response = await api.get("/user/session");
 
-      if(response.status === 200) {
-        return response.data;
-      }
+      return response.data;
+      
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -163,6 +167,22 @@ const userSlice = createSlice({
       state.loading = false;
       state.user = null;
 
+    })
+    .addCase(loginWithGoogle.pending, (state) => {
+      // 구글 로그인 pending
+      state.loading = true;
+    })
+    .addCase(loginWithGoogle.fulfilled, (state, action) => {
+      // 구글 로그인 fulfilled
+      state.loading = false;
+      state.user = action.payload.user;
+      state.loginError = null;
+    })
+    .addCase(loginWithGoogle.rejected, (state, action) => {
+      // 구글 로그인 rejected
+      state.loginError = action.payload;
+      state.loading = false;
+      state.user = null;
     });
   },
 });

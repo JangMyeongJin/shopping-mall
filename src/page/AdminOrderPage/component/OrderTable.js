@@ -9,8 +9,8 @@ const OrderTable = ({ header, data, openEditForm }) => {
       <Table striped bordered hover>
         <thead>
           <tr>
-            {header.map((title) => (
-              <th>{title}</th>
+            {header.map((title, idx) => (
+              <th key={idx}>{title}</th>
             ))}
           </tr>
         </thead>

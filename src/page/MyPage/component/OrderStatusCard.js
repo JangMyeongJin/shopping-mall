@@ -9,9 +9,10 @@ const OrderStatusCard = ({ orderItem }) => {
       <Row className="status-card">
         <Col xs={2}>
           <img
-            src={orderItem.items[0]?.productId?.image}
-            alt={orderItem.items[0]?.productId?.image}
+            src={orderItem.items[0]?.product?.image}
+            alt={orderItem.items[0]?.product?.image}
             height={96}
+            style={{ width: "100%", height: "100%" }}
           />
         </Col>
         <Col xs={8} className="order-info">
@@ -19,10 +20,10 @@ const OrderStatusCard = ({ orderItem }) => {
             <strong>주문번호: {orderItem.orderNum}</strong>
           </div>
 
-          {/* <div className="text-12">{orderItem.createdAt.slice(0, 10)}</div> */}
+          <div className="text-12">{orderItem.createdAt.slice(0, 10)}</div>
 
           <div>
-            {orderItem.items[0].productId.name}
+            {orderItem.items[0].product.name}
             {orderItem.items.length > 1 && `외 ${orderItem.items.length - 1}개`}
           </div>
           <div>₩ {currencyFormat(orderItem.totalPrice)}</div>

@@ -11,12 +11,14 @@ import { Link, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../features/user/userSlice";
+import { getProductList } from "../../features/product/productSlice";
 
 const Navbar = ({ user }) => {
   const location = useLocation();
   const hideMenuPaths = ['/login', '/signup'];
   const shouldHideMenu = hideMenuPaths.includes(location.pathname);
-
+  const {loading} = useSelector((state) => state.product);
+  const [inputValue, setInputValue] = useState("");
   const dispatch = useDispatch();
   const { cartItemCount } = useSelector((state) => state.cart);
   const isMobile = window.navigator.userAgent.indexOf("Mobile") !== -1;
@@ -49,6 +51,19 @@ const Navbar = ({ user }) => {
   // useEffect(() => {
   //   dispatch(getCartList());
   // }, []);
+
+  useEffect(() => {
+    setInputValue("");
+  }, [loading]);
+
+  const handleClickLogo = () => {
+    // dispatch(getProductList({
+    //   name: "",
+    //   page: 1,
+    //   limit: 8,
+    // }));
+    navigate("/?page=1");
+  };
 
   return (
     <div>
@@ -133,9 +148,8 @@ const Navbar = ({ user }) => {
       </div>
 
       <div className="nav-logo">
-        <Link to="/">
-          <img width={100} src="/image/hm-logo.png" alt="hm-logo.png" />
-        </Link>
+          <img width={100} src="/image/hm-logo.png" alt="hm-logo.png" onClick={handleClickLogo}/>
+
       </div>
       {!shouldHideMenu && (
         <div className="nav-menu-area">
@@ -153,6 +167,8 @@ const Navbar = ({ user }) => {
               type="text"
               placeholder="Search"
               onKeyPress={onCheckEnter}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
             />
           </div>
           )}

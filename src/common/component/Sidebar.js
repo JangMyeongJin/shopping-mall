@@ -35,13 +35,22 @@ const Sidebar = () => {
       </div>
     );
   };
+
+  const handleClickLogo = () => {
+    // dispatch(getProductList({
+    //   name: "",
+    //   page: 1,
+    //   limit: 8,
+    // }));
+    navigate("/?page=1");
+  };
   return (
     <>
       <div className="sidebar-toggle">{NavbarContent()}</div>
 
       <Navbar bg="light" expand={false} className="mobile-sidebar-toggle">
         <Container fluid>
-          <img width={80} src="/image/hm-logo.png" alt="hm-logo.png" />
+          <img width={80} src="/image/hm-logo.png" alt="hm-logo.png" onClick={handleClickLogo} />
           <Navbar.Brand href="#"></Navbar.Brand>
           <Navbar.Toggle
             aria-controls={`offcanvasNavbar-expand`}

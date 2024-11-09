@@ -39,18 +39,19 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
   const [categoryError, setCategoryError] = useState(false);
 
   const [addCategory, setAddCategory] = useState("");
+  const [categoryInputError, setCategoryInputError] = useState(false);  // 새로운 state 추가
+
 
   useEffect(() => {
-    console.log("success : ", success);
     if (success) {
-      setShowDialog(false);
+      handleClose();
     }
   }, [success]);
 
   useEffect(() => {
     setAddCategory("");
     dispatch(getCategories());
-  }, [categoryLoading]);
+  }, [dispatch,categoryLoading]);
 
   useEffect(() => {
     if (error || !success) {
@@ -70,7 +71,7 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
         setStock([]);
       }
     }
-  }, [showDialog]);
+  }, [showDialog, dispatch, error, mode, selectedProduct, success]);
 
   const handleClose = () => {
     //모든걸 초기화시키고;
@@ -186,6 +187,11 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
 
   const submitNewCategory = () => {
     // 새로운 카테고리 추가
+    if(addCategory.trim() === ""){
+      setCategoryInputError(true);
+      return;
+    }
+    setCategoryInputError(false);
     dispatch(putCategories({category: addCategory}));
   };
 
@@ -253,7 +259,7 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
           <Button size="sm" onClick={addStock}>
             Add +
           </Button>
-          <div className="mt-2">
+          <div className="mt-2 stock">
             {stock.map((item, index) => (
               <Row key={index}>
                 <Col sm={4}>
@@ -318,8 +324,8 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
           />
         </Form.Group>
 
-        <Row className="mb-3">
-          <Form.Group as={Col} controlId="price">
+        <Row className="mb-3 mobile-group">
+          <Form.Group as={Col} controlId="price" className="mobile-group2">
             <Form.Label>Price</Form.Label>
             <Form.Control
               value={formData.price}
@@ -333,16 +339,15 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
             )}
           </Form.Group>
 
-          <Form.Group as={Col} controlId="category">
+          <Form.Group as={Col} controlId="category" className="mobile-group2">
             <Form.Label>Category</Form.Label>
             {categoryError && (
               <div><span className="error-message">Please check category</span></div>
             )}
             <Col style={{height: "150px", overflowY: "auto"}}>
               {categories.map((item, idx) => (
-                <div style={{display: "flex", justifyContent: "space-between", "marginBottom": "0.2rem"}}>
+                <div key={idx} style={{display: "flex", justifyContent: "space-between", "marginBottom": "0.2rem"}}>
                 <Form.Check
-                  key={idx}
                   type="checkbox"
                   id={`category-${idx}`}
                   label={item.name}
@@ -378,11 +383,13 @@ const NewItemDialog = ({ mode, showDialog, setShowDialog }) => {
                 placeholder="Add Category"
                 value={addCategory}
               />
-              
+              {categoryInputError && (
+                <span className="error-message">카테고리명을 입력해주세요</span>
+              )}
             </Col>
           </Form.Group>
 
-          <Form.Group as={Col} controlId="status">
+          <Form.Group as={Col} controlId="status" className="mobile-group2">
             <Form.Label>Status</Form.Label>
             <Form.Select
               value={formData.status}

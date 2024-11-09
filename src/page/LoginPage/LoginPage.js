@@ -30,7 +30,7 @@ const Login = () => {
 
   const handleGoogleLogin = async (googleData) => {
     //구글 로그인 하기
-    console.log(googleData);
+    dispatch(loginWithGoogle(googleData.credential));
 
   };
 

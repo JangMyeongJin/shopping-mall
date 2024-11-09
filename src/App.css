@@ -45,21 +45,25 @@ body{
 .landing-search-box{
   right: 20px;
   position: absolute;
-
+  border-bottom: 1px solid black;
+  padding: 5px !important;
+  width: auto !important;
 }
 .sidebar{
   max-width: 500px;
 }
 
 .search-box{
-  border-bottom: 1px solid black;
+  width: 50%;
   /* position: absolute; */
-  padding: 5px;
+  padding: 15px 5px;
 }
 .search-box input{
   border:none;
   margin-left:5px;
   background-color: #FAF9F8;
+  width: 70%;
+  border-bottom: 1px solid black;
 }
 .search-box input:focus {
   outline:none
@@ -267,6 +271,9 @@ body{
 
 .landing-search-box input{
   background-color: #FAF9F8;
+  border:none;
+  margin-left:5px;
+  background-color: #FAF9F8;
 }
 
 .link-area{
@@ -274,4 +281,12 @@ body{
   justify-content: flex-end;
   margin-top: 20px;
   margin-right: 20px;
+}
+@media screen and (max-width: 430px) {
+  .mobile-group{
+    display: block;
+  }
+  .mobile-group2{
+    margin-bottom: 1rem;
+  }
 }

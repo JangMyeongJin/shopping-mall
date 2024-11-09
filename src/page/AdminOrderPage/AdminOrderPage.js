@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import ReactPaginate from "react-paginate";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -16,10 +16,11 @@ const AdminOrderPage = () => {
   const navigate = useNavigate();
   const [query] = useSearchParams();
   const dispatch = useDispatch();
-  const { orderList, totalPageNum } = useSelector((state) => state.order);
+  const { orderList, totalPageNum, totalCount } = useSelector((state) => state.order);
   const [searchQuery, setSearchQuery] = useState({
     page: query.get("page") || 1,
     ordernum: query.get("ordernum") || "",
+    limit: query.get("limit") || 3,
   });
   const [open, setOpen] = useState(false);
 
@@ -37,7 +38,6 @@ const AdminOrderPage = () => {
   useEffect(() => {
     dispatch(getOrderList({ ...searchQuery }));
   }, [query]);
-  console.log("orderList : ", orderList);
 
   useEffect(() => {
     if (searchQuery.ordernum === "") {
@@ -62,6 +62,14 @@ const AdminOrderPage = () => {
     setOpen(false);
   };
 
+  const handleLimitChange = (event) => {
+    setSearchQuery({
+      ...searchQuery,
+      page: 1,
+      limit: event.target.value
+    });
+  };
+
   return (
     <div className="locate-center">
       <Container>
@@ -73,6 +81,21 @@ const AdminOrderPage = () => {
             field="ordernum"
           />
         </div>
+        <Row>
+          <Col style={{display: "flex", justifyContent: "space-between"}}>
+            <div style={{marginBottom: "20px"}}>
+              Total <span style={{ fontWeight: "bold", color: "#cd1729" }}>{totalCount}</span> orders
+            </div>
+            <div>
+              <span>Show : </span>
+              <select value={searchQuery.limit} onChange={handleLimitChange}>
+                <option value="3">3</option>
+                <option value="10">10</option>
+                <option value="30">30</option>
+              </select>
+            </div>
+          </Col>
+        </Row>
 
         <OrderTable
           header={tableHeader}

@@ -20,9 +20,6 @@ export const createOrder = createAsyncThunk(
     try {
       const response = await api.post("/order", payload);
 
-      if(response.status !== 200){
-        throw new Error(response.error);
-      }
       dispatch(showToastMessage({message: "Order created successfully", status: "success"}));
       dispatch(getCartQty());
       return response.data.orderNum;
@@ -38,9 +35,7 @@ export const getOrder = createAsyncThunk(
   async (_, { rejectWithValue, dispatch }) => {
     try {
       const response = await api.get("/order");
-      if (response.status !== 200) {
-        throw new Error(response.error);
-      }
+
       return response.data.orders;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -53,9 +48,7 @@ export const getOrderList = createAsyncThunk(
   async (query, { rejectWithValue, dispatch }) => {
     try {
       const response = await api.get("/order/admin", { params: {...query} });
-      if (response.status !== 200) {
-        throw new Error(response.error);
-      }
+
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -65,7 +58,18 @@ export const getOrderList = createAsyncThunk(
 
 export const updateOrder = createAsyncThunk(
   "order/updateOrder",
-  async ({ id, status }, { dispatch, rejectWithValue }) => {}
+  async ({ id, status }, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await api.put(`/order/${id}`, { status });
+
+      dispatch(showToastMessage({message: `Order status changed to ${status}`, status: "success"}));
+      dispatch(getOrderList({page: 1, status}));
+      return response.data;
+    } catch (error) {
+      dispatch(showToastMessage({message: "Order status update failed", status: "error"}));
+      return rejectWithValue(error.response.data);
+    }
+  }
 );
 
 // Order slice
@@ -111,8 +115,20 @@ const orderSlice = createSlice({
         state.error = "";
         state.orderList = action.payload.orders;
         state.totalPageNum = action.payload.totalPageNum;
+        state.totalCount = action.payload.totalCount;
       })
       .addCase(getOrderList.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updateOrder.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateOrder.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = "";
+      })
+      .addCase(updateOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

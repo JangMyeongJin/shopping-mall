@@ -26,8 +26,13 @@
 
 .mt-2{
     margin-top: 20px;
+    justify-content: space-between;
+    display: flex;
 }
-
+.stock{
+    margin-top: 20px;
+    display: block;
+}
 .form-container{
     padding:20px
 }

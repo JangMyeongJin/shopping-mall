@@ -7,10 +7,9 @@ export const getProductList = createAsyncThunk(
   "products/getProductList",
   async (query, { rejectWithValue }) => {
     try {
+      console.log(query);
       const response = await api.get("/product", {params: {...query}});
-      if (response.status !== 200) {
-        throw new Error(response.error);
-      }
+
       return response.data;
     } catch (err) {
       return rejectWithValue(err.error);
@@ -23,9 +22,7 @@ export const getProductDetail = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await api.get(`/product/${id}`);
-      if (response.status !== 200) {
-        throw new Error(response.error);
-      }
+
       return response.data;
     } catch (err) {
       return rejectWithValue(err.message);
@@ -39,9 +36,6 @@ export const createProduct = createAsyncThunk(
     try{
       const response = await api.post("/product", formData);
 
-      if (response.status !== 200) {
-        throw new Error(response.error);
-      }
       dispatch(showToastMessage({ message: "Success add new Item", status: "success" }));
       dispatch(getProductList({page: 1}));
       return response.data.data;
@@ -56,9 +50,7 @@ export const deleteProduct = createAsyncThunk(
   async (id, { dispatch, rejectWithValue }) => {
     try{
       const response = await api.delete(`/product/${id}`);
-      if (response.status !== 200) {
-        throw new Error(response.error);
-      }
+
       dispatch(getProductList({page: 1}));
       dispatch(showToastMessage({ message: "Delete Item", status: "success" }));
       return response.data.data;
@@ -73,9 +65,7 @@ export const editProduct = createAsyncThunk(
   async ({ id, ...formData }, { dispatch, rejectWithValue }) => {
     try{
       const response = await api.put(`/product/${id}`, formData);
-      if (response.status !== 200) {
-        throw new Error(response.error);
-      }
+
       dispatch(showToastMessage({ message: "Success edit Item", status: "success" }));
       dispatch(getProductList({page: 1}));
       return response.data.data;
@@ -91,9 +81,6 @@ export const getCategories = createAsyncThunk(
   async (_, { dispatch,rejectWithValue }) => {
     try {
       const response = await api.get("/category");
-      if (response.status !== 200) {
-        throw new Error(response.error);
-      }
 
       return response.data.data;
     } catch (err) {
@@ -107,10 +94,7 @@ export const putCategories = createAsyncThunk(
   async ({category}, { dispatch,rejectWithValue }) => {
     try {
       const response = await api.post("/category", {name: category});
-      if (response.status !== 200) {
-        throw new Error(response.error);
-      }
-      console.log(response);
+
       return response.data.data;
     } catch (err) {
       return rejectWithValue(err.message);
@@ -123,9 +107,7 @@ export const deleteCategory = createAsyncThunk(
   async ({id}, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.delete(`/category/${id}`);
-      if (response.status !== 200) {
-        throw new Error(response.error);
-      }
+
       return response.data.data;
     } catch (err) {
       return rejectWithValue(err.message);
@@ -145,6 +127,7 @@ const productSlice = createSlice({
     success: false,
     categories: [],
     categoryLoading: false,
+    totalCount: 0,
   },
   reducers: {
     setSelectedProduct: (state, action) => {
@@ -164,6 +147,7 @@ const productSlice = createSlice({
       state.loading = true;
     })
     .addCase(createProduct.fulfilled, (state, action) => {
+      console.log("success");
       state.error = "";
       state.loading = false;
       state.success = true;
@@ -173,72 +157,71 @@ const productSlice = createSlice({
       state.error = action.payload;
       state.success = false;
     })
-      .addCase(getCategories.fulfilled, (state, action) => {
-        state.categories = action.payload;
-      })
-      .addCase(getCategories.rejected, (state, action) => {
-        state.error = action.payload;
-      })
-      .addCase(putCategories.pending, (state) => {
-        state.categoryLoading = true;
-      })
-      .addCase(putCategories.fulfilled, (state, action) => {
-        state.categoryLoading = false;
-      })
-      .addCase(putCategories.rejected, (state, action) => {
-        state.categoryLoading = false;
-        state.error = action.payload;
-      })
-      .addCase(deleteCategory.pending, (state, action) => {
-        state.categoryLoading = true;
-      })
-      .addCase(deleteCategory.fulfilled, (state, action) => {
-        state.categoryLoading = false;
-      })
-      .addCase(deleteCategory.rejected, (state, action) => {
-        state.categoryLoading = false;
-        state.error = action.payload;
-      })
-      .addCase(getProductList.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(getProductList.fulfilled, (state, action) => {
-        state.loading = false;
-        state.productList = action.payload.products;
-        state.totalPageNum = action.payload.totalPageNum;
-        state.error = "";
-      })
-      .addCase(getProductList.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      .addCase(editProduct.pending, (state) => {
-        state.success = false;
-        state.loading = true;
-      })
-      .addCase(editProduct.fulfilled, (state, action) => {
-        state.loading = false;
-        state.success = true;
-        state.error = "";
-        console.log(state.success);
-      })
-      .addCase(editProduct.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-        state.success = false;
-      })
-      .addCase(getProductDetail.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(getProductDetail.fulfilled, (state, action) => {
-        console.log(action.payload);
-        state.loading = false;
-        state.selectedProduct = action.payload.product;
-      })
-      .addCase(getProductDetail.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
+    .addCase(getCategories.fulfilled, (state, action) => {
+      state.categories = action.payload;
+    })
+    .addCase(getCategories.rejected, (state, action) => {
+      state.error = action.payload;
+    })
+    .addCase(putCategories.pending, (state) => {
+      state.categoryLoading = true;
+    })
+    .addCase(putCategories.fulfilled, (state, action) => {
+      state.categoryLoading = false;
+    })
+    .addCase(putCategories.rejected, (state, action) => {
+      state.categoryLoading = false;
+      state.error = action.payload;
+    })
+    .addCase(deleteCategory.pending, (state, action) => {
+      state.categoryLoading = true;
+    })
+    .addCase(deleteCategory.fulfilled, (state, action) => {
+      state.categoryLoading = false;
+    })
+    .addCase(deleteCategory.rejected, (state, action) => {
+      state.categoryLoading = false;
+      state.error = action.payload;
+    })
+    .addCase(getProductList.pending, (state) => {
+      state.loading = true;
+    })
+    .addCase(getProductList.fulfilled, (state, action) => {
+      state.loading = false;
+      state.productList =  action.payload.products;
+      state.totalPageNum = action.payload.totalPageNum;
+      state.totalCount = action.payload.totalCount;
+      state.error = "";
+    })
+    .addCase(getProductList.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    })
+    .addCase(editProduct.pending, (state) => {
+      state.success = false;
+      state.loading = true;
+    })
+    .addCase(editProduct.fulfilled, (state, action) => {
+      state.loading = false;
+      state.success = true;
+      state.error = "";
+    })
+    .addCase(editProduct.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+      state.success = false;
+    })
+    .addCase(getProductDetail.pending, (state) => {
+      state.loading = true;
+    })
+    .addCase(getProductDetail.fulfilled, (state, action) => {
+      state.loading = false;
+      state.selectedProduct = action.payload.product;
+    })
+    .addCase(getProductDetail.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    });
   },
 });
 

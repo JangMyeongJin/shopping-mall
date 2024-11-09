@@ -17,11 +17,12 @@ const AdminProductPage = () => {
   const navigate = useNavigate();
   const [query] = useSearchParams();  // url 파라미터 읽어오기
   const dispatch = useDispatch();
-  const { productList, totalPageNum } = useSelector((state) => state.product);
+  const { productList, totalPageNum, totalCount } = useSelector((state) => state.product);
   const [showDialog, setShowDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState({
     page: query.get("page") || 1,
     name: query.get("name") || "",
+    limit: query.get("limit") || 5,
   }); //검색 조건들을 저장하는 객체
 
   const [mode, setMode] = useState("new");
@@ -40,7 +41,7 @@ const AdminProductPage = () => {
   //상품리스트 가져오기 (url쿼리 맞춰서)
   useEffect(() => {
     dispatch(getProductList({...searchQuery}));
-  }, [query]);
+  }, [query, showDialog]);
 
   useEffect(() => {
     //검색어나 페이지가 바뀌면 url바꿔주기 (검색어또는 페이지가 바뀜 => url 바꿔줌=> url쿼리 읽어옴=> 이 쿼리값 맞춰서  상품리스트 가져오기)
@@ -54,7 +55,7 @@ const AdminProductPage = () => {
   }, [searchQuery]);
 
   const deleteItem = (id) => {
-    //아이템 삭제하가ㅣ
+    //아이템 삭제하기
     const isConfirmed = window.confirm("Are you sure you want to delete this product?");
     if(isConfirmed){
       dispatch(deleteProduct(id));
@@ -83,6 +84,15 @@ const AdminProductPage = () => {
     setSearchQuery({...searchQuery, page: selected + 1});
   };
 
+  // 페이지당 개수 바꾸기
+  const handleLimitChange = (event) => {
+    setSearchQuery({
+      ...searchQuery,
+      page: 1, 
+      limit: event.target.value
+    });
+  };
+
   return (
     <div className="locate-center">
       <Container>
@@ -90,13 +100,26 @@ const AdminProductPage = () => {
           <SearchBox
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            placeholder="제품 이름으로 검색"
+            placeholder="Product name search"
             field="name"
           />
+          <Button className="mt-2 mb-2" onClick={handleClickNewItem}>
+            Add New Item +
+          </Button>
         </div>
-        <Button className="mt-2 mb-2" onClick={handleClickNewItem}>
-          Add New Item +
-        </Button>
+        <div className="d-flex justify-content-between">
+          <div style={{paddingTop: "20px"}}>
+            Total <span style={{fontWeight: "bold", color: "#cd1729"}}> {totalCount} </span> items
+          </div>
+          <div style={{paddingTop: "20px"}}>
+            <span>Show : </span>
+            <select value={searchQuery.limit} onChange={handleLimitChange}>
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="30">30</option>
+            </select>
+          </div>
+        </div>
 
         <ProductTable
           header={tableHeader}
